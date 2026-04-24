@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import BackButton from "@/components/BackButton";
+import GameHeader from "@/components/GameHeader";
 
 const EMOJI_POOL = ["🦊", "🐼", "🦁", "🐸", "🦋", "🐙", "🦄", "🐬", "🦜", "🐺", "🦩", "🐳"];
 
@@ -91,131 +91,126 @@ export default function MemoryPage() {
   );
 
   const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-
-  const cols = pairs === 6 ? "grid-cols-4" : pairs === 8 ? "grid-cols-4" : "grid-cols-6";
+  const cols = pairs === 12 ? "grid-cols-6" : "grid-cols-4";
 
   if (!started) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-6" style={{ background: "var(--bg-primary)" }}>
-        <div className="w-full max-w-sm">
-          <div className="mb-10">
-            <BackButton />
+      <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
+        <GameHeader title="Memory" />
+        <main className="flex-1 flex items-center justify-center px-6 py-12">
+          <div className="w-full max-w-xs">
+            <div className="text-center mb-8">
+              <div className="text-5xl mb-4">🧩</div>
+              <h2 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
+                Choose difficulty
+              </h2>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                More pairs = harder game
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              {([6, 8, 12] as const).map((p, i) => {
+                const labels = ["Easy — 6 pairs", "Medium — 8 pairs", "Hard — 12 pairs"];
+                const isAccent = i === 2;
+                return (
+                  <button
+                    key={p}
+                    onClick={() => startGame(p)}
+                    className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-150"
+                    style={{
+                      background: isAccent ? "var(--accent)" : "var(--bg-card)",
+                      border: `1px solid ${isAccent ? "var(--accent)" : "var(--border)"}`,
+                      color: isAccent ? "#fff" : "var(--text-primary)",
+                    }}
+                    onMouseEnter={(e) => { if (!isAccent) e.currentTarget.style.borderColor = "var(--accent)"; }}
+                    onMouseLeave={(e) => { if (!isAccent) e.currentTarget.style.borderColor = "var(--border)"; }}
+                  >
+                    {labels[i]}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="text-4xl mb-4 text-center">🧩</div>
-          <h1 className="text-2xl font-semibold text-center mb-2" style={{ color: "var(--text-primary)" }}>
-            Memory
-          </h1>
-          <p className="text-center text-sm mb-10" style={{ color: "var(--text-secondary)" }}>
-            Choose a difficulty
-          </p>
-          <div className="flex flex-col gap-3">
-            {([6, 8, 12] as const).map((p, i) => {
-              const labels = ["Easy — 6 pairs", "Medium — 8 pairs", "Hard — 12 pairs"];
-              return (
-                <button
-                  key={p}
-                  onClick={() => startGame(p)}
-                  className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-150"
-                  style={{
-                    background: i === 2 ? "var(--accent)" : "var(--bg-card)",
-                    border: `1px solid ${i === 2 ? "var(--accent)" : "var(--border)"}`,
-                    color: i === 2 ? "#fff" : "var(--text-primary)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (i !== 2) e.currentTarget.style.borderColor = "var(--accent)";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (i !== 2) e.currentTarget.style.borderColor = "var(--border)";
-                  }}
-                >
-                  {labels[i]}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-10" style={{ background: "var(--bg-primary)" }}>
-      <div className="w-full max-w-lg">
-        <div className="flex items-center justify-between mb-8">
-          <BackButton />
-          <button
-            onClick={() => setStarted(false)}
-            className="text-xs px-3 py-1.5 rounded-lg"
-            style={{ color: "var(--text-muted)", background: "var(--bg-card)", border: "1px solid var(--border)" }}
-          >
-            Change difficulty
-          </button>
-        </div>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
+      <GameHeader title="Memory" />
+      <main className="flex-1 flex flex-col items-center px-4 py-8">
+        <div className="w-full max-w-lg">
 
-        <div className="flex items-center justify-between mb-6 px-1">
-          <div>
-            <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Moves</div>
-            <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{moves}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Time</div>
-            <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{fmt(seconds)}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Matched</div>
-            <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>
-              {cards.filter((c) => c.matched).length / 2}/{pairs}
-            </div>
-          </div>
-        </div>
-
-        {won && (
+          {/* Stats row */}
           <div
-            className="rounded-xl px-4 py-3 mb-6 text-center text-sm"
-            style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)" }}
+            className="grid grid-cols-3 gap-px rounded-2xl overflow-hidden mb-6"
+            style={{ background: "var(--border)", border: "1px solid var(--border)" }}
           >
-            <span style={{ color: "var(--accent)" }}>
-              You won in {moves} moves and {fmt(seconds)}! 🎉
-            </span>
+            {[
+              { label: "Moves", value: moves },
+              { label: "Time", value: fmt(seconds) },
+              { label: "Pairs", value: `${cards.filter((c) => c.matched).length / 2}/${pairs}` },
+            ].map(({ label, value }) => (
+              <div key={label} className="text-center py-4" style={{ background: "var(--bg-card)" }}>
+                <div className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{label}</div>
+                <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{value}</div>
+              </div>
+            ))}
           </div>
-        )}
 
-        <div className={`grid ${cols} gap-2 mb-6`}>
-          {cards.map((card) => (
-            <button
-              key={card.id}
-              onClick={() => handleCard(card.id)}
-              className="aspect-square rounded-xl text-2xl flex items-center justify-center transition-all duration-200 font-medium"
-              style={{
-                background: card.matched
-                  ? "var(--accent-dim)"
-                  : card.flipped
-                  ? "var(--bg-card-hover)"
-                  : "var(--bg-card)",
-                border: card.matched
-                  ? "1px solid var(--accent)"
-                  : card.flipped
-                  ? "1px solid var(--border)"
-                  : "1px solid var(--border-subtle)",
-                cursor: card.matched || card.flipped ? "default" : "pointer",
-                transform: card.flipped || card.matched ? "scale(1)" : "scale(0.97)",
-              }}
+          {won && (
+            <div
+              className="rounded-xl px-4 py-3 mb-5 text-center text-sm"
+              style={{ background: "var(--accent-dim)", border: "1px solid var(--accent)" }}
             >
-              {card.flipped || card.matched ? card.emoji : ""}
-            </button>
-          ))}
-        </div>
+              <span style={{ color: "var(--accent)" }}>
+                You won in {moves} moves and {fmt(seconds)}! 🎉
+              </span>
+            </div>
+          )}
 
-        <button
-          onClick={() => startGame(pairs)}
-          className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
-          style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-        >
-          Restart
-        </button>
-      </div>
-    </main>
+          {/* Grid */}
+          <div className={`grid ${cols} gap-2 mb-5`}>
+            {cards.map((card) => (
+              <button
+                key={card.id}
+                onClick={() => handleCard(card.id)}
+                className="aspect-square rounded-xl text-2xl flex items-center justify-center transition-all duration-200"
+                style={{
+                  background: card.matched ? "var(--accent-dim)" : card.flipped ? "var(--bg-card-hover)" : "var(--bg-card)",
+                  border: card.matched ? "1px solid var(--accent)" : "1px solid var(--border-subtle)",
+                  cursor: card.matched || card.flipped ? "default" : "pointer",
+                  transform: card.flipped || card.matched ? "scale(1)" : "scale(0.96)",
+                }}
+              >
+                {card.flipped || card.matched ? card.emoji : ""}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => startGame(pairs)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+            >
+              Restart
+            </button>
+            <button
+              onClick={() => setStarted(false)}
+              className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+            >
+              Change difficulty
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import BackButton from "@/components/BackButton";
+import GameHeader from "@/components/GameHeader";
 
 const GRID = 20;
 const CELL = 20;
@@ -78,7 +78,11 @@ export default function SnakePage() {
     s.dir = s.nextDir;
     const head = { x: s.snake[0].x + s.dir.x, y: s.snake[0].y + s.dir.y };
 
-    if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID || s.snake.some((seg) => seg.x === head.x && seg.y === head.y)) {
+    if (
+      head.x < 0 || head.x >= GRID ||
+      head.y < 0 || head.y >= GRID ||
+      s.snake.some((seg) => seg.x === head.x && seg.y === head.y)
+    ) {
       s.running = false;
       s.dead = true;
       setStatus("dead");
@@ -117,9 +121,7 @@ export default function SnakePage() {
     draw();
   }, [tick, draw, speed]);
 
-  useEffect(() => {
-    draw();
-  }, [draw]);
+  useEffect(() => { draw(); }, [draw]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -145,12 +147,9 @@ export default function SnakePage() {
     return () => { if (loopRef.current) clearInterval(loopRef.current); };
   }, []);
 
-  const handleSwipe = useCallback(() => {
+  useEffect(() => {
     let startX = 0, startY = 0;
-    const onStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
-    };
+    const onStart = (e: TouchEvent) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; };
     const onEnd = (e: TouchEvent) => {
       const dx = e.changedTouches[0].clientX - startX;
       const dy = e.changedTouches[0].clientY - startY;
@@ -172,72 +171,71 @@ export default function SnakePage() {
     };
   }, []);
 
-  useEffect(handleSwipe, [handleSwipe]);
-
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-10" style={{ background: "var(--bg-primary)" }}>
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-8">
-          <BackButton />
-          <div className="flex items-center gap-2">
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Speed:</span>
-            {([200, 150, 100] as const).map((sp, i) => (
-              <button
-                key={sp}
-                onClick={() => setSpeed(sp)}
-                className="text-xs px-2.5 py-1 rounded-lg transition-all"
-                style={{
-                  background: speed === sp ? "var(--accent)" : "var(--bg-card)",
-                  color: speed === sp ? "#fff" : "var(--text-muted)",
-                  border: `1px solid ${speed === sp ? "var(--accent)" : "var(--border)"}`,
-                }}
-              >
-                {["Slow", "Normal", "Fast"][i]}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
+      <GameHeader title="Snake" />
+      <main className="flex-1 flex flex-col items-center px-4 py-8">
+        <div className="w-full max-w-md">
 
-        <div className="flex items-center justify-between mb-4 px-1">
-          <h1 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>🐍 Snake</h1>
-          <div className="text-right">
-            <div className="text-xs" style={{ color: "var(--text-muted)" }}>Score</div>
-            <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{score}</div>
-          </div>
-        </div>
-
-        <div
-          className="rounded-2xl overflow-hidden mb-4 relative"
-          style={{ border: "1px solid var(--border)" }}
-        >
-          <canvas ref={canvasRef} width={SIZE} height={SIZE} className="block w-full" />
-          {status !== "running" && (
-            <div
-              className="absolute inset-0 flex flex-col items-center justify-center gap-4"
-              style={{ background: "rgba(26,26,26,0.85)" }}
-            >
-              {status === "dead" && (
-                <p className="text-base font-medium" style={{ color: "var(--accent)" }}>
-                  Game over — score: {score}
-                </p>
-              )}
-              <button
-                onClick={startGame}
-                className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all"
-                style={{ background: "var(--accent)", color: "#fff" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
-              >
-                {status === "idle" ? "Start game" : "Play again"}
-              </button>
+          {/* Score + speed */}
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Score</div>
+              <div className="text-2xl font-semibold" style={{ color: "var(--text-primary)" }}>{score}</div>
             </div>
-          )}
-        </div>
+            <div className="flex items-center gap-1.5">
+              {([200, 150, 100] as const).map((sp, i) => (
+                <button
+                  key={sp}
+                  onClick={() => setSpeed(sp)}
+                  className="text-xs px-2.5 py-1 rounded-lg transition-all"
+                  style={{
+                    background: speed === sp ? "var(--accent)" : "var(--bg-card)",
+                    color: speed === sp ? "#fff" : "var(--text-muted)",
+                    border: `1px solid ${speed === sp ? "var(--accent)" : "var(--border)"}`,
+                  }}
+                >
+                  {["Slow", "Normal", "Fast"][i]}
+                </button>
+              ))}
+            </div>
+          </div>
 
-        <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-          Arrow keys or WASD to move • Swipe on mobile
-        </p>
-      </div>
-    </main>
+          {/* Canvas */}
+          <div
+            className="rounded-2xl overflow-hidden mb-4 relative"
+            style={{ border: "1px solid var(--border)" }}
+          >
+            <canvas ref={canvasRef} width={SIZE} height={SIZE} className="block w-full" />
+            {status !== "running" && (
+              <div
+                className="absolute inset-0 flex flex-col items-center justify-center gap-5"
+                style={{ background: "rgba(26,26,26,0.88)" }}
+              >
+                {status === "dead" && (
+                  <div className="text-center">
+                    <div className="text-base font-semibold mb-1" style={{ color: "var(--accent)" }}>Game over</div>
+                    <div className="text-sm" style={{ color: "var(--text-muted)" }}>Score: {score}</div>
+                  </div>
+                )}
+                <button
+                  onClick={startGame}
+                  className="px-6 py-2.5 rounded-xl text-sm font-medium transition-all"
+                  style={{ background: "var(--accent)", color: "#fff" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
+                >
+                  {status === "idle" ? "Start game" : "Play again"}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+            Arrow keys or WASD · Swipe on mobile
+          </p>
+        </div>
+      </main>
+    </div>
   );
 }

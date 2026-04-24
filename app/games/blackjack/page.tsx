@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import BackButton from "@/components/BackButton";
+import GameHeader from "@/components/GameHeader";
 
 type Suit = "♠" | "♥" | "♦" | "♣";
 type Rank = "A" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "J" | "Q" | "K";
@@ -35,10 +35,7 @@ function handTotal(hand: Card[]): number {
     total += cardValue(c.rank);
     if (c.rank === "A") aces++;
   }
-  while (total > 21 && aces > 0) {
-    total -= 10;
-    aces--;
-  }
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
   return total;
 }
 
@@ -73,8 +70,6 @@ export default function BlackjackPage() {
     setMessage("");
 
     const pTotal = handTotal(player);
-    const dVisible = cardValue(dealer[0].rank);
-
     if (pTotal === 21) {
       const revealed = dealer.map((c) => ({ ...c, hidden: false }));
       const dTotal = fullTotal(dealer);
@@ -93,7 +88,6 @@ export default function BlackjackPage() {
       }
     } else {
       setPhase("playing");
-      if (dVisible === 11) setMessage("Dealer shows Ace — insurance? (not implemented)");
     }
   }, [balance]);
 
@@ -132,20 +126,13 @@ export default function BlackjackPage() {
         setDealerHand(currentHand);
         setPhase("over");
         if (dealerTotal > 21) {
-          setResult("win");
-          setBalance((b) => b + bet * 2);
-          setMessage("Dealer busts — you win! 🎉");
+          setResult("win"); setBalance((b) => b + bet * 2); setMessage("Dealer busts — you win! 🎉");
         } else if (playerTotal > dealerTotal) {
-          setResult("win");
-          setBalance((b) => b + bet * 2);
-          setMessage("You win! 🎉");
+          setResult("win"); setBalance((b) => b + bet * 2); setMessage("You win! 🎉");
         } else if (playerTotal < dealerTotal) {
-          setResult("loss");
-          setMessage("Dealer wins.");
+          setResult("loss"); setMessage("Dealer wins.");
         } else {
-          setResult("push");
-          setBalance((b) => b + bet);
-          setMessage("Push — it's a tie.");
+          setResult("push"); setBalance((b) => b + bet); setMessage("Push — it's a tie.");
         }
       }
     };
@@ -168,23 +155,22 @@ export default function BlackjackPage() {
   const renderCard = (card: Card, i: number) => (
     <div
       key={i}
-      className="flex flex-col items-center justify-between rounded-xl p-2 text-sm font-bold select-none"
+      className="flex flex-col items-center justify-between rounded-xl p-2 text-sm font-bold select-none shrink-0"
       style={{
-        width: 54,
-        height: 76,
-        background: card.hidden ? "var(--bg-card)" : "#f8f8f0",
-        border: `1px solid ${card.hidden ? "var(--border)" : "#ddd"}`,
+        width: 56,
+        height: 80,
+        background: card.hidden ? "var(--bg-secondary)" : "#f7f5f0",
+        border: `1px solid ${card.hidden ? "var(--border)" : "#d8d4cc"}`,
         color: card.hidden ? "var(--border)" : isRed(card.suit) ? "#c0392b" : "#1a1a1a",
-        flexShrink: 0,
       }}
     >
       {card.hidden ? (
-        <div className="flex-1 flex items-center justify-center text-xl" style={{ color: "var(--border)" }}>?</div>
+        <div className="flex-1 flex items-center justify-center text-2xl" style={{ color: "var(--border-subtle)" }}>?</div>
       ) : (
         <>
-          <span className="self-start text-xs leading-none">{card.rank}<br />{card.suit}</span>
+          <span className="self-start text-xs leading-tight">{card.rank}<br />{card.suit}</span>
           <span className="text-xl leading-none">{card.suit}</span>
-          <span className="self-end text-xs leading-none rotate-180">{card.rank}<br />{card.suit}</span>
+          <span className="self-end text-xs leading-tight rotate-180">{card.rank}<br />{card.suit}</span>
         </>
       )}
     </div>
@@ -193,197 +179,187 @@ export default function BlackjackPage() {
   const chipAmounts = [25, 50, 100, 200, 500];
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-10" style={{ background: "var(--bg-primary)" }}>
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-8">
-          <BackButton />
-          <div className="text-right">
-            <div className="text-xs" style={{ color: "var(--text-muted)" }}>Balance</div>
-            <div className="text-lg font-semibold" style={{ color: balance === 0 ? "var(--accent)" : "var(--text-primary)" }}>
-              ${balance}
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
+      <GameHeader title="Blackjack" />
+      <main className="flex-1 flex flex-col items-center px-4 py-8">
+        <div className="w-full max-w-md">
 
-        <h1 className="text-xl font-semibold mb-6" style={{ color: "var(--text-primary)" }}>♠️ Blackjack</h1>
-
-        {phase !== "betting" && (
-          <div className="flex flex-col gap-6 mb-6">
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>Dealer</span>
-                <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-                  {phase === "over" || phase === "dealer" ? fullTotal(dealerHand) : handTotal(dealerHand)}
-                </span>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {dealerHand.map((c, i) => renderCard(c, i))}
-              </div>
-            </div>
-
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>You</span>
-                <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-                  {handTotal(playerHand)}
-                </span>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {playerHand.map((c, i) => renderCard(c, i))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {message && (
+          {/* Balance bar */}
           <div
-            className="rounded-xl px-4 py-3 mb-4 text-center text-sm"
-            style={{
-              background: result === "win" || result === "blackjack" ? "var(--accent-dim)" : "var(--bg-card)",
-              border: `1px solid ${result === "win" || result === "blackjack" ? "var(--accent)" : "var(--border)"}`,
-              color: result === "win" || result === "blackjack" ? "var(--accent)" : "var(--text-secondary)",
-            }}
-          >
-            {message}
-          </div>
-        )}
-
-        {phase === "betting" && (
-          <div
-            className="rounded-2xl p-5"
+            className="flex items-center justify-between rounded-2xl px-5 py-3 mb-6"
             style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
           >
-            {balance === 0 ? (
-              <div className="text-center">
-                <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>You're out of chips!</p>
-                <button
-                  onClick={() => setBalance(1000)}
-                  className="px-5 py-2.5 rounded-xl text-sm font-medium"
-                  style={{ background: "var(--accent)", color: "#fff" }}
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>Balance</span>
+            <span className="text-lg font-semibold" style={{ color: balance === 0 ? "var(--accent)" : "var(--text-primary)" }}>
+              ${balance}
+            </span>
+          </div>
+
+          {/* Hands */}
+          {phase !== "betting" && (
+            <div className="flex flex-col gap-4 mb-5">
+              {[
+                { label: "Dealer", hand: dealerHand, total: phase === "over" || phase === "dealer" ? fullTotal(dealerHand) : handTotal(dealerHand) },
+                { label: "You", hand: playerHand, total: handTotal(playerHand) },
+              ].map(({ label, hand, total }) => (
+                <div
+                  key={label}
+                  className="rounded-2xl p-4"
+                  style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
                 >
-                  Reload $1000
-                </button>
-              </div>
-            ) : (
-              <>
-                <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>Place your bet</p>
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {chipAmounts.filter((c) => c <= balance).map((amount) => (
-                    <button
-                      key={amount}
-                      onClick={() => setBet((b) => Math.min(b + amount, balance))}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
-                      style={{
-                        background: "var(--bg-secondary)",
-                        border: "1px solid var(--border)",
-                        color: "var(--text-primary)",
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{label}</span>
+                    <span
+                      className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                      style={{ background: "var(--bg-secondary)", color: "var(--text-secondary)", border: "1px solid var(--border-subtle)" }}
                     >
-                      +${amount}
-                    </button>
-                  ))}
-                  {bet > 0 && (
-                    <button
-                      onClick={() => setBet(0)}
-                      className="px-3 py-1.5 rounded-lg text-sm font-medium"
-                      style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-                    >
-                      Clear
-                    </button>
-                  )}
+                      {total}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">{hand.map((c, i) => renderCard(c, i))}</div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                    Bet: <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>${bet}</span>
-                  </span>
+              ))}
+            </div>
+          )}
+
+          {/* Message */}
+          {message && (
+            <div
+              className="rounded-xl px-4 py-3 mb-4 text-center text-sm"
+              style={{
+                background: result === "win" || result === "blackjack" ? "var(--accent-dim)" : "var(--bg-card)",
+                border: `1px solid ${result === "win" || result === "blackjack" ? "var(--accent)" : "var(--border)"}`,
+                color: result === "win" || result === "blackjack" ? "var(--accent)" : "var(--text-secondary)",
+              }}
+            >
+              {message}
+            </div>
+          )}
+
+          {/* Betting UI */}
+          {phase === "betting" && (
+            <div
+              className="rounded-2xl p-5"
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+            >
+              {balance === 0 ? (
+                <div className="text-center py-2">
+                  <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>You're out of chips!</p>
                   <button
-                    onClick={() => deal(bet)}
-                    disabled={bet === 0}
-                    className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
-                    style={{
-                      background: bet > 0 ? "var(--accent)" : "var(--bg-secondary)",
-                      color: bet > 0 ? "#fff" : "var(--text-muted)",
-                      border: "none",
-                      cursor: bet > 0 ? "pointer" : "not-allowed",
-                    }}
-                    onMouseEnter={(e) => { if (bet > 0) e.currentTarget.style.background = "var(--accent-hover)"; }}
-                    onMouseLeave={(e) => { if (bet > 0) e.currentTarget.style.background = "var(--accent)"; }}
+                    onClick={() => setBalance(1000)}
+                    className="px-5 py-2.5 rounded-xl text-sm font-medium"
+                    style={{ background: "var(--accent)", color: "#fff" }}
                   >
-                    Deal
+                    Reload $1000
                   </button>
                 </div>
-              </>
-            )}
-          </div>
-        )}
+              ) : (
+                <>
+                  <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>Place your bet</p>
+                  <div className="flex flex-wrap gap-2 mb-5">
+                    {chipAmounts.filter((c) => c <= balance).map((amount) => (
+                      <button
+                        key={amount}
+                        onClick={() => setBet((b) => Math.min(b + amount, balance))}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium transition-all"
+                        style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+                      >
+                        +${amount}
+                      </button>
+                    ))}
+                    {bet > 0 && (
+                      <button
+                        onClick={() => setBet(0)}
+                        className="px-3 py-1.5 rounded-lg text-sm"
+                        style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                      Bet: <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>${bet}</span>
+                    </span>
+                    <button
+                      onClick={() => deal(bet)}
+                      disabled={bet === 0}
+                      className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
+                      style={{
+                        background: bet > 0 ? "var(--accent)" : "var(--bg-secondary)",
+                        color: bet > 0 ? "#fff" : "var(--text-muted)",
+                        cursor: bet > 0 ? "pointer" : "not-allowed",
+                      }}
+                      onMouseEnter={(e) => { if (bet > 0) e.currentTarget.style.background = "var(--accent-hover)"; }}
+                      onMouseLeave={(e) => { if (bet > 0) e.currentTarget.style.background = "var(--accent)"; }}
+                    >
+                      Deal
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
-        {phase === "playing" && (
-          <div className="flex gap-3">
-            <button
-              onClick={hit}
-              className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
-              style={{ background: "var(--accent)", color: "#fff" }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
-            >
-              Hit
-            </button>
-            <button
-              onClick={() => stand()}
-              className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-              onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-            >
-              Stand
-            </button>
-            {playerHand.length === 2 && bet <= balance && (
+          {/* Actions */}
+          {phase === "playing" && (
+            <div className="flex gap-3">
               <button
-                onClick={() => {
-                  setBalance((b) => b - bet);
-                  setBet((b) => b * 2);
-                  hit();
-                }}
+                onClick={hit}
+                className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
+                style={{ background: "var(--accent)", color: "#fff" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
+              >
+                Hit
+              </button>
+              <button
+                onClick={() => stand()}
                 className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
                 style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
                 onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
               >
-                Double
+                Stand
               </button>
-            )}
-          </div>
-        )}
+              {playerHand.length === 2 && bet <= balance && (
+                <button
+                  onClick={() => { setBalance((b) => b - bet); setBet((b) => b * 2); hit(); }}
+                  className="flex-1 py-3 rounded-xl text-sm font-medium transition-all"
+                  style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
+                >
+                  Double
+                </button>
+              )}
+            </div>
+          )}
 
-        {phase === "over" && (
-          <button
-            onClick={newRound}
-            className="w-full py-3 rounded-xl text-sm font-medium transition-all"
-            style={{ background: "var(--accent)", color: "#fff" }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
-          >
-            Next round
-          </button>
-        )}
+          {phase === "over" && (
+            <button
+              onClick={newRound}
+              className="w-full py-3 rounded-xl text-sm font-medium transition-all"
+              style={{ background: "var(--accent)", color: "#fff" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
+            >
+              Next round
+            </button>
+          )}
 
-        {phase === "dealer" && (
-          <div
-            className="py-3 text-center text-sm rounded-xl"
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-          >
-            Dealer playing…
-          </div>
-        )}
-      </div>
-    </main>
+          {phase === "dealer" && (
+            <div
+              className="py-3 text-center text-sm rounded-xl"
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+            >
+              Dealer playing…
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
   );
 }

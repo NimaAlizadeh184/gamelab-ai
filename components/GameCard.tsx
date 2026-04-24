@@ -12,48 +12,63 @@ interface GameCardProps {
 
 export default function GameCard({ title, description, href, icon, tags }: GameCardProps) {
   return (
-    <Link href={href} className="group block">
+    <Link href={href} style={{ textDecoration: "none" }} className="group block h-full">
       <div
-        className="relative rounded-2xl p-6 h-full transition-all duration-200 cursor-pointer"
+        className="flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-200"
         style={{
           background: "var(--bg-card)",
           border: "1px solid var(--border)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLDivElement).style.background = "var(--bg-card-hover)";
-          (e.currentTarget as HTMLDivElement).style.borderColor = "var(--accent)";
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.borderColor = "var(--accent)";
+          el.style.transform = "translateY(-2px)";
+          el.style.boxShadow = "0 8px 24px rgba(0,0,0,0.3)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLDivElement).style.background = "var(--bg-card)";
-          (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border)";
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.borderColor = "var(--border)";
+          el.style.transform = "translateY(0)";
+          el.style.boxShadow = "none";
         }}
       >
-        <div className="text-4xl mb-4">{icon}</div>
-        <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-          {title}
-        </h2>
-        <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-          {description}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-xs px-2 py-1 rounded-full"
-              style={{
-                background: "var(--accent-dim)",
-                color: "var(--accent)",
-              }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
+        {/* Icon area */}
         <div
-          className="absolute bottom-6 right-6 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ color: "var(--accent)" }}
+          className="flex items-center justify-center py-8 text-4xl"
+          style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-subtle)" }}
         >
-          Play →
+          {icon}
+        </div>
+
+        {/* Content */}
+        <div className="flex flex-col flex-1 p-5">
+          <h2 className="text-base font-semibold mb-1.5" style={{ color: "var(--text-primary)" }}>
+            {title}
+          </h2>
+          <p className="text-sm leading-relaxed flex-1" style={{ color: "var(--text-secondary)" }}>
+            {description}
+          </p>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between mt-4 pt-4" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+            <div className="flex flex-wrap gap-1.5">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={{ background: "var(--bg-secondary)", color: "var(--text-muted)", border: "1px solid var(--border-subtle)" }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+            <span
+              className="text-xs font-medium shrink-0 ml-3 transition-colors duration-150"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Play →
+            </span>
+          </div>
         </div>
       </div>
     </Link>
