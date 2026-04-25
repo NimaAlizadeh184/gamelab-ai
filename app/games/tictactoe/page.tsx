@@ -3,6 +3,8 @@
 import { useState, useCallback } from "react";
 import GameHeader from "@/components/GameHeader";
 
+const COLOR = "#3B82F6";
+
 type Player = "X" | "O";
 type Cell = Player | null;
 type Board = Cell[];
@@ -17,54 +19,37 @@ const WINNING_LINES = [
 function checkWinner(board: Board): { winner: Player; line: number[] } | null {
   for (const line of WINNING_LINES) {
     const [a, b, c] = line;
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c])
       return { winner: board[a] as Player, line };
-    }
   }
   return null;
 }
 
-function minimax(board: Board, isMaximizing: boolean): number {
-  const result = checkWinner(board);
-  if (result?.winner === "O") return 10;
-  if (result?.winner === "X") return -10;
+function minimax(board: Board, isMax: boolean): number {
+  const r = checkWinner(board);
+  if (r?.winner === "O") return 10;
+  if (r?.winner === "X") return -10;
   if (board.every(Boolean)) return 0;
-
-  if (isMaximizing) {
-    let best = -Infinity;
-    for (let i = 0; i < 9; i++) {
-      if (!board[i]) {
-        board[i] = "O";
-        best = Math.max(best, minimax(board, false));
-        board[i] = null;
-      }
+  let best = isMax ? -Infinity : Infinity;
+  for (let i = 0; i < 9; i++) {
+    if (!board[i]) {
+      board[i] = isMax ? "O" : "X";
+      const v = minimax(board, !isMax);
+      board[i] = null;
+      best = isMax ? Math.max(best, v) : Math.min(best, v);
     }
-    return best;
-  } else {
-    let best = Infinity;
-    for (let i = 0; i < 9; i++) {
-      if (!board[i]) {
-        board[i] = "X";
-        best = Math.min(best, minimax(board, true));
-        board[i] = null;
-      }
-    }
-    return best;
   }
+  return best;
 }
 
 function getBestMove(board: Board): number {
-  let bestVal = -Infinity;
-  let bestMove = -1;
+  let bestVal = -Infinity, bestMove = -1;
   for (let i = 0; i < 9; i++) {
     if (!board[i]) {
       board[i] = "O";
-      const moveVal = minimax(board, false);
+      const v = minimax(board, false);
       board[i] = null;
-      if (moveVal > bestVal) {
-        bestVal = moveVal;
-        bestMove = i;
-      }
+      if (v > bestVal) { bestVal = v; bestMove = i; }
     }
   }
   return bestMove;
@@ -79,6 +64,7 @@ export default function TicTacToePage() {
   const result = checkWinner(board);
   const isDraw = !result && board.every(Boolean);
   const isOver = !!result || isDraw;
+  const winLine = result?.line ?? [];
 
   const reset = useCallback(() => {
     setBoard(Array(9).fill(null));
@@ -86,69 +72,48 @@ export default function TicTacToePage() {
     setThinking(false);
   }, []);
 
-  const handleCell = useCallback(
-    (index: number) => {
-      if (board[index] || isOver || thinking) return;
+  const handleCell = useCallback((i: number) => {
+    if (board[i] || isOver || thinking) return;
+    const nb = [...board];
+    nb[i] = current;
+    setBoard(nb);
+    const nr = checkWinner(nb);
+    if (nr || nb.every(Boolean)) return;
+    if (mode === "ai" && current === "X") {
+      setThinking(true);
+      setTimeout(() => {
+        const ab = [...nb];
+        const m = getBestMove(ab);
+        if (m !== -1) ab[m] = "O";
+        setBoard(ab);
+        setCurrent("X");
+        setThinking(false);
+      }, 320);
+    } else {
+      setCurrent(current === "X" ? "O" : "X");
+    }
+  }, [board, current, isOver, mode, thinking]);
 
-      const newBoard = [...board];
-      newBoard[index] = current;
-      setBoard(newBoard);
-
-      const nextResult = checkWinner(newBoard);
-      const nextDraw = !nextResult && newBoard.every(Boolean);
-      if (nextResult || nextDraw) return;
-
-      if (mode === "ai" && current === "X") {
-        setThinking(true);
-        setTimeout(() => {
-          const aiBoard = [...newBoard];
-          const move = getBestMove(aiBoard);
-          if (move !== -1) aiBoard[move] = "O";
-          setBoard(aiBoard);
-          setCurrent("X");
-          setThinking(false);
-        }, 300);
-      } else {
-        setCurrent(current === "X" ? "O" : "X");
-      }
-    },
-    [board, current, isOver, mode, thinking]
-  );
-
-  const winLine = result?.line ?? [];
+  const xColor = COLOR;
+  const oColor = "var(--text-primary)";
 
   if (!mode) {
     return (
-      <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
-        <GameHeader title="Tic-Tac-Toe" />
-        <main className="flex-1 flex items-center justify-center px-6 py-12">
-          <div className="w-full max-w-xs">
-            <div className="text-center mb-8">
-              <div className="text-5xl mb-4">⭕</div>
-              <h2 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>
-                Choose a mode
-              </h2>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                Play locally or face the AI
-              </p>
+      <div className="page">
+        <GameHeader title="Tic-Tac-Toe" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 320 }}>
+            <div className="text-center mb-10">
+              <div className="text-5xl mb-5">⭕</div>
+              <h2 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>Choose a mode</h2>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Play locally or face the AI</p>
             </div>
             <div className="flex flex-col gap-3">
-              <button
-                onClick={() => { setMode("local"); reset(); }}
-                className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-150"
-                style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-              >
+              <button className="btn btn-secondary btn-lg w-full" onClick={() => { setMode("local"); reset(); }}>
                 👥 Local — 2 Players
               </button>
-              <button
-                onClick={() => { setMode("ai"); reset(); }}
-                className="w-full py-3 rounded-xl text-sm font-medium transition-all duration-150"
-                style={{ background: "var(--accent)", color: "#fff", border: "none" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--accent-hover)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--accent)")}
-              >
+              <button className="btn btn-primary btn-lg w-full" onClick={() => { setMode("ai"); reset(); }}
+                style={{ background: COLOR }}>
                 🤖 vs AI
               </button>
             </div>
@@ -159,38 +124,28 @@ export default function TicTacToePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-primary)" }}>
-      <GameHeader title="Tic-Tac-Toe" />
-      <main className="flex-1 flex flex-col items-center px-6 py-10">
-        <div className="w-full max-w-xs">
+    <div className="page">
+      <GameHeader title="Tic-Tac-Toe" color={COLOR} />
+      <main className="page-content">
+        <div className="game-container" style={{ maxWidth: 340 }}>
 
-          {/* Mode badge + change */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <span
-              className="text-xs px-2.5 py-1 rounded-full"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+              className="text-xs px-2.5 py-1 rounded-full font-medium"
+              style={{ background: `${COLOR}18`, color: COLOR, border: `1px solid ${COLOR}35` }}
             >
               {mode === "ai" ? "vs AI" : "2 Players"}
             </span>
-            <button
-              onClick={() => setMode(null)}
-              className="text-xs transition-colors"
-              style={{ color: "var(--text-muted)" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-secondary)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
-            >
+            <button className="btn btn-ghost btn-sm" onClick={() => setMode(null)}>
               Change mode
             </button>
           </div>
 
           {/* Board */}
-          <div
-            className="rounded-2xl p-3 mb-5"
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
-          >
+          <div className="card p-3 mb-5" style={{ boxShadow: "var(--shadow-md)" }}>
             <div className="grid grid-cols-3 gap-2">
               {board.map((cell, i) => {
-                const isWinCell = winLine.includes(i);
+                const isWin = winLine.includes(i);
                 return (
                   <button
                     key={i}
@@ -198,18 +153,13 @@ export default function TicTacToePage() {
                     disabled={!!cell || isOver || thinking}
                     className="aspect-square rounded-xl text-3xl font-bold flex items-center justify-center transition-all duration-150"
                     style={{
-                      background: isWinCell ? "var(--accent-dim)" : "var(--bg-secondary)",
-                      border: isWinCell ? "1px solid var(--accent)" : "1px solid var(--border-subtle)",
-                      color: cell === "X" ? "var(--accent)" : "var(--text-primary)",
+                      background: isWin ? `${COLOR}18` : "var(--bg-secondary)",
+                      border: `1px solid ${isWin ? COLOR + "50" : "var(--border-subtle)"}`,
+                      color: cell === "X" ? xColor : oColor,
                       cursor: cell || isOver || thinking ? "default" : "pointer",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!cell && !isOver && !thinking)
-                        e.currentTarget.style.background = "var(--bg-card-hover)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = isWinCell ? "var(--accent-dim)" : "var(--bg-secondary)";
-                    }}
+                    onMouseEnter={(e) => { if (!cell && !isOver && !thinking) e.currentTarget.style.background = "var(--bg-card-hover)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = isWin ? `${COLOR}18` : "var(--bg-secondary)"; }}
                   >
                     {cell}
                   </button>
@@ -221,36 +171,28 @@ export default function TicTacToePage() {
           {/* Status */}
           <div
             className="rounded-xl px-4 py-3 mb-4 text-center text-sm"
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+            style={{
+              background: isOver
+                ? isDraw ? "var(--warning-dim)" : result?.winner === "X" && mode === "ai" ? "var(--success-dim)" : result?.winner === "O" && mode === "ai" ? "var(--error-dim)" : "var(--success-dim)"
+                : "var(--bg-card)",
+              border: `1px solid ${isOver
+                ? isDraw ? "var(--warning-dim)" : result?.winner === "X" && mode === "ai" ? "var(--success-border)" : result?.winner === "O" && mode === "ai" ? "var(--error-border)" : "var(--success-border)"
+                : "var(--border)"}`,
+              color: isOver
+                ? isDraw ? "var(--warning)" : result?.winner === "X" && mode === "ai" ? "var(--success)" : result?.winner === "O" && mode === "ai" ? "var(--error)" : "var(--success)"
+                : "var(--text-secondary)",
+            }}
           >
-            {isOver ? (
-              <span style={{ color: "var(--accent)" }}>
-                {isDraw
-                  ? "It's a draw!"
-                  : mode === "ai"
-                  ? result?.winner === "X" ? "You win! 🎉" : "AI wins!"
-                  : `Player ${result?.winner} wins! 🎉`}
-              </span>
-            ) : thinking ? (
-              <span style={{ color: "var(--text-muted)" }}>AI is thinking…</span>
-            ) : (
-              <span style={{ color: "var(--text-secondary)" }}>
-                {mode === "ai"
-                  ? current === "X" ? "Your turn (X)" : "AI's turn (O)"
-                  : `Player ${current}'s turn`}
-              </span>
-            )}
+            {isOver
+              ? isDraw ? "It's a draw!"
+                : mode === "ai" ? result?.winner === "X" ? "You win! 🎉" : "AI wins."
+                : `Player ${result?.winner} wins! 🎉`
+              : thinking ? "AI is thinking…"
+              : mode === "ai" ? current === "X" ? "Your turn (X)" : "AI's turn (O)"
+              : `Player ${current}'s turn`}
           </div>
 
-          <button
-            onClick={reset}
-            className="w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-150"
-            style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-primary)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--accent)")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--border)")}
-          >
-            New game
-          </button>
+          <button className="btn btn-secondary w-full" onClick={reset}>New game</button>
         </div>
       </main>
     </div>
