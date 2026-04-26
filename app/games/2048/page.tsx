@@ -103,6 +103,7 @@ function newGame(): { grid: Grid; score: number } {
 }
 
 export default function Game2048() {
+  const [started, setStarted] = useState(false);
   const [{ grid, score }, setGame] = useState(newGame);
   const [best, setBest] = useState(0);
   const [won, setWon] = useState(false);
@@ -153,6 +154,45 @@ export default function Game2048() {
 
   const restart = () => { setGame(newGame()); setWon(false); setOver(false); };
 
+  if (!started) {
+    return (
+      <div className="page">
+        <GameHeader title="2048" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center font-black text-3xl"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30`, color: COLOR }}>
+                2048
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>2048</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Slide tiles to merge matching numbers. Reach 2048 to win.
+            </p>
+            <div className="card p-4 mb-8">
+              <div className="text-xs space-y-2" style={{ color: "var(--text-secondary)" }}>
+                {[
+                  ["Arrow keys / WASD", "Slide tiles"],
+                  ["Swipe", "Slide on mobile"],
+                  ["Same numbers", "Merge into double"],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded font-mono text-xs" style={{ background: "var(--bg-raised)", color: "var(--text-primary)" }}>{key}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button className="btn btn-primary btn-lg w-full" style={{ background: COLOR }} onClick={() => { restart(); setStarted(true); }}>
+              Start game
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <GameHeader title="2048" color={COLOR} />
@@ -169,7 +209,7 @@ export default function Game2048() {
               <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Best</div>
               <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{best}</div>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={restart}>New</button>
+            <button className="btn btn-secondary btn-sm" onClick={restart}>New game</button>
           </div>
 
           {(won || over) && (

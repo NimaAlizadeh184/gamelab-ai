@@ -66,8 +66,56 @@ export default function RPSPage() {
     setRound(0); setGameOver(false); setAnimating(false);
   };
 
+  const [started, setStarted] = useState(false);
   const wins = score.wins, losses = score.losses;
   const finalResult = wins > losses ? "win" : losses > wins ? "loss" : "draw";
+
+  if (!started) {
+    return (
+      <div className="page">
+        <GameHeader title="Rock Paper Scissors" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30` }}
+              >
+                ✊
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Rock Paper Scissors</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Best of {TARGET} against the AI. First to {Math.ceil(TARGET / 2)} wins takes the series.
+            </p>
+            <div className="card p-4 mb-8">
+              <div className="text-xs space-y-3" style={{ color: "var(--text-secondary)" }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-base">✊</span>
+                  <span>Rock beats Scissors</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-base">🖐️</span>
+                  <span>Paper beats Rock</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-base">✌️</span>
+                  <span>Scissors beats Paper</span>
+                </div>
+              </div>
+            </div>
+            <button
+              className="btn btn-primary btn-lg w-full"
+              style={{ background: COLOR, color: "#fff" }}
+              onClick={() => setStarted(true)}
+            >
+              Start game
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page">

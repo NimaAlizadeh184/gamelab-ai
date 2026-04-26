@@ -178,17 +178,40 @@ export default function ConnectFourPage() {
       <div className="page">
         <GameHeader title="Connect Four" color={COLOR} />
         <main className="page-content justify-center">
-          <div className="game-container" style={{ maxWidth: 320 }}>
-            <div className="text-center mb-10">
-              <div className="text-5xl mb-5">🔴</div>
-              <h2 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>Connect Four</h2>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Drop discs, connect four to win</p>
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center gap-1 flex-wrap p-3"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30` }}
+              >
+                {["🔴","🟡","🔴","🟡","🔴","🟡"].map((e, i) => (
+                  <span key={i} className="text-sm leading-none">{e}</span>
+                ))}
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Connect Four</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Drop discs and connect four in a row to win.
+            </p>
+            <div className="card p-4 mb-8">
+              <div className="text-xs space-y-2" style={{ color: "var(--text-secondary)" }}>
+                {[
+                  ["Click a column", "Drop your disc"],
+                  ["4 in a row", "Horizontal, vertical, or diagonal"],
+                  ["Red vs Yellow", "First to four wins"],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between gap-3">
+                    <span className="px-2 py-0.5 rounded font-mono text-xs shrink-0" style={{ background: "var(--bg-raised)", color: "var(--text-primary)" }}>{key}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{desc}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             <div className="flex flex-col gap-3">
               <button className="btn btn-secondary btn-lg w-full" onClick={() => { setMode("local"); reset(); }}>
                 👥 Local — 2 Players
               </button>
-              <button className="btn btn-primary btn-lg w-full" style={{ background: COLOR }} onClick={() => { setMode("ai"); reset(); }}>
+              <button className="btn btn-primary btn-lg w-full" style={{ background: COLOR, color: "#111" }} onClick={() => { setMode("ai"); reset(); }}>
                 🤖 vs AI
               </button>
             </div>

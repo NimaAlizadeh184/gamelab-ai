@@ -146,12 +146,34 @@ export default function MinesweeperPage() {
       <div className="page">
         <GameHeader title="Minesweeper" color={COLOR} />
         <main className="page-content justify-center">
-          <div className="game-container" style={{ maxWidth: 320 }}>
-            <div className="text-center mb-10">
-              <div className="text-5xl mb-5">💣</div>
-              <h2 className="text-xl font-semibold mb-2" style={{ color: "var(--text-primary)" }}>Choose difficulty</h2>
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Left click to reveal · Right click to flag</p>
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30` }}
+              >
+                💣
+              </div>
             </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Minesweeper</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Clear the minefield without hitting a bomb. First click is always safe.
+            </p>
+            <div className="card p-4 mb-6">
+              <div className="text-xs space-y-2" style={{ color: "var(--text-secondary)" }}>
+                {[
+                  ["Left click", "Reveal a cell"],
+                  ["Right click", "Place or remove a flag"],
+                  ["Numbers", "Adjacent mine count"],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between gap-3">
+                    <span className="px-2 py-0.5 rounded font-mono text-xs shrink-0" style={{ background: "var(--bg-raised)", color: "var(--text-primary)" }}>{key}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-wide mb-3" style={{ color: "var(--text-muted)" }}>Choose difficulty</p>
             <div className="flex flex-col gap-3">
               {(["easy","medium","hard"] as Difficulty[]).map((d, i) => {
                 const { rows, cols, mines } = CONFIGS[d];
@@ -159,7 +181,7 @@ export default function MinesweeperPage() {
                 return (
                   <button
                     key={d}
-                    className="btn btn-lg w-full flex flex-col gap-0.5"
+                    className="btn btn-lg w-full flex items-center justify-between px-5"
                     style={i === 2
                       ? { background: COLOR, color: "#fff", border: "none" }
                       : { background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
@@ -167,8 +189,8 @@ export default function MinesweeperPage() {
                     onMouseEnter={(e) => { if (i !== 2) e.currentTarget.style.borderColor = COLOR; }}
                     onMouseLeave={(e) => { if (i !== 2) e.currentTarget.style.borderColor = "var(--border)"; }}
                   >
-                    <span>{labels[i]}</span>
-                    <span style={{ fontSize: "0.7rem", opacity: 0.6 }}>{rows}×{cols} · {mines} mines</span>
+                    <span className="font-semibold">{labels[i]}</span>
+                    <span style={{ fontSize: "0.75rem", opacity: 0.65 }}>{rows}×{cols} · {mines} mines</span>
                   </button>
                 );
               })}

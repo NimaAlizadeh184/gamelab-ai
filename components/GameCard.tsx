@@ -24,8 +24,8 @@ export default function GameCard({ title, description, href, icon, tags, color }
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLDivElement;
           el.style.transform = "translateY(-3px)";
-          el.style.borderColor = color + "60";
-          el.style.boxShadow = `0 12px 32px rgba(0,0,0,0.6), 0 0 0 1px ${color}30`;
+          el.style.borderColor = color + "55";
+          el.style.boxShadow = `0 16px 40px rgba(0,0,0,0.55), 0 0 0 1px ${color}25`;
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLDivElement;
@@ -36,18 +36,25 @@ export default function GameCard({ title, description, href, icon, tags, color }
       >
         {/* Icon area */}
         <div
-          className="relative flex items-center justify-center py-9"
+          className="relative flex items-center justify-center py-10"
           style={{
-            background: `linear-gradient(135deg, ${color}1a 0%, ${color}08 100%)`,
-            borderBottom: `1px solid ${color}20`,
+            background: `radial-gradient(ellipse at 50% 60%, ${color}22 0%, ${color}06 70%, transparent 100%)`,
+            borderBottom: `1px solid ${color}18`,
           }}
         >
-          <span className="text-4xl select-none">{icon}</span>
-          {/* Subtle glow dot */}
+          {/* Icon container */}
           <div
-            className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1 h-1 rounded-full"
-            style={{ background: color, opacity: 0.6, boxShadow: `0 0 8px 3px ${color}` }}
-          />
+            className="flex items-center justify-center rounded-2xl text-4xl select-none transition-transform duration-200 group-hover:scale-110"
+            style={{
+              width: 72,
+              height: 72,
+              background: `linear-gradient(145deg, ${color}20, ${color}08)`,
+              border: `1px solid ${color}28`,
+              boxShadow: `0 4px 20px ${color}25, inset 0 1px 0 ${color}30`,
+            }}
+          >
+            {icon}
+          </div>
         </div>
 
         {/* Content */}
@@ -55,24 +62,22 @@ export default function GameCard({ title, description, href, icon, tags, color }
           <h2 className="text-sm font-semibold mb-1.5 tracking-tight" style={{ color: "var(--text-primary)" }}>
             {title}
           </h2>
-          <p className="text-xs leading-relaxed flex-1" style={{ color: "var(--text-secondary)", lineHeight: 1.6 }}>
+          <p className="text-xs leading-relaxed flex-1" style={{ color: "var(--text-secondary)", lineHeight: 1.65 }}>
             {description}
           </p>
 
-          <div
-            className="flex items-center justify-between mt-4 pt-3.5"
-            style={{ borderTop: "1px solid var(--border-subtle)" }}
-          >
+          <div className="flex items-center justify-between mt-4 pt-3.5" style={{ borderTop: "1px solid var(--border-subtle)" }}>
             <div className="flex flex-wrap gap-1.5">
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="text-xs px-2 py-0.5 rounded-full"
+                  className="px-2 py-0.5 rounded-full"
                   style={{
-                    background: "var(--bg-secondary)",
-                    color: "var(--text-muted)",
-                    border: "1px solid var(--border-subtle)",
-                    fontSize: "0.7rem",
+                    background: `${color}12`,
+                    color,
+                    border: `1px solid ${color}25`,
+                    fontSize: "0.68rem",
+                    fontWeight: 500,
                   }}
                 >
                   {tag}
@@ -80,8 +85,8 @@ export default function GameCard({ title, description, href, icon, tags, color }
               ))}
             </div>
             <span
-              className="text-xs font-medium shrink-0 ml-3 transition-colors duration-150"
-              style={{ color: "var(--text-muted)" }}
+              className="text-xs font-medium shrink-0 ml-3 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+              style={{ color }}
             >
               Play →
             </span>

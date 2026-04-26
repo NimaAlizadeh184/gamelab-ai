@@ -3,15 +3,15 @@ import GameCard from "@/components/GameCard";
 const games = [
   {
     title: "Tetris",
-    description: "Stack falling tetrominoes, clear lines, and survive as long as you can. Speed increases with every level.",
+    description: "Stack falling tetrominoes, clear lines, and survive as long as you can. Speed increases every level.",
     href: "/games/tetris",
-    icon: "🎮",
+    icon: "🟦",
     tags: ["Single Player", "Arcade"],
     color: "#818CF8",
   },
   {
     title: "Wordle",
-    description: "Guess the hidden 5-letter word in 6 tries. Color hints guide you to the answer.",
+    description: "Guess the hidden 5-letter word in 6 tries. Green means correct, yellow means wrong position.",
     href: "/games/wordle",
     icon: "🟩",
     tags: ["Single Player", "Word"],
@@ -19,23 +19,23 @@ const games = [
   },
   {
     title: "Connect Four",
-    description: "Drop discs and connect four in a row — horizontally, vertically, or diagonally. Play locally or vs AI.",
+    description: "Drop discs and connect four in a row. Play against a friend or challenge the AI.",
     href: "/games/connectfour",
     icon: "🔴",
-    tags: ["2 Players", "vs AI", "Strategy"],
+    tags: ["2 Players", "vs AI"],
     color: "#F472B6",
   },
   {
     title: "Blackjack",
-    description: "Beat the dealer to 21. Hit, stand, or double down — starts with $1,000 in chips.",
+    description: "Beat the dealer to 21 without going bust. Hit, stand, or double down. Starts with $1,000.",
     href: "/games/blackjack",
-    icon: "♠️",
+    icon: "🂡",
     tags: ["Single Player", "Cards"],
     color: "#F59E0B",
   },
   {
     title: "Snake",
-    description: "Guide the snake, eat food, and grow without hitting the walls. Three speeds.",
+    description: "Guide the snake, eat food, and grow as long as you can without hitting the walls.",
     href: "/games/snake",
     icon: "🐍",
     tags: ["Single Player", "Arcade"],
@@ -43,7 +43,7 @@ const games = [
   },
   {
     title: "2048",
-    description: "Slide tiles to merge numbers and reach 2048. Easy to learn, hard to master.",
+    description: "Slide tiles to merge matching numbers. Reach 2048 to win. Harder than it looks.",
     href: "/games/2048",
     icon: "🔢",
     tags: ["Single Player", "Puzzle"],
@@ -51,7 +51,7 @@ const games = [
   },
   {
     title: "Minesweeper",
-    description: "Clear the minefield without detonating a single bomb. Three difficulty levels.",
+    description: "Clear the minefield without hitting a bomb. First click is always safe.",
     href: "/games/minesweeper",
     icon: "💣",
     tags: ["Single Player", "Strategy"],
@@ -59,15 +59,15 @@ const games = [
   },
   {
     title: "Memory",
-    description: "Flip cards and find matching pairs. Three difficulty levels — how fast can you clear the board?",
+    description: "Flip cards and find matching pairs. Three difficulty levels to keep it challenging.",
     href: "/games/memory",
-    icon: "🧩",
+    icon: "🃏",
     tags: ["Single Player", "Puzzle"],
     color: "#A855F7",
   },
   {
     title: "Tic-Tac-Toe",
-    description: "Classic 3×3 strategy. Play against a friend locally or face an unbeatable AI.",
+    description: "The classic 3x3 grid game. Play locally with a friend or face an unbeatable AI.",
     href: "/games/tictactoe",
     icon: "⭕",
     tags: ["2 Players", "vs AI"],
@@ -75,7 +75,7 @@ const games = [
   },
   {
     title: "Rock Paper Scissors",
-    description: "The timeless hand game. Play best-of-5 against a random AI.",
+    description: "Best of 5 against an AI. Simple, fast, and surprisingly addictive.",
     href: "/games/rps",
     icon: "✊",
     tags: ["vs AI", "Quick Play"],
@@ -90,22 +90,24 @@ export default function Home() {
       <header
         className="sticky top-0 z-20 w-full"
         style={{
-          background: "rgba(22,22,22,0.88)",
+          background: "rgba(22,22,22,0.9)",
           borderBottom: "1px solid var(--border-subtle)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
+          backdropFilter: "blur(16px)",
+          WebkitBackdropFilter: "blur(16px)",
         }}
       >
-        <div className="max-w-6xl mx-auto px-6 flex items-center gap-2.5" style={{ height: 52 }}>
+        <div className="max-w-6xl mx-auto px-6 flex items-center gap-3" style={{ height: 52 }}>
           <div
-            className="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold"
-            style={{ background: "var(--accent)", color: "#fff" }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold"
+            style={{ background: "var(--accent)", color: "#fff", boxShadow: "0 2px 8px rgba(217,119,87,0.4)" }}
           >
             G
           </div>
           <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>GameLab</span>
           <div className="flex-1" />
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>{games.length} games</span>
+          <span className="text-xs px-2.5 py-1 rounded-full" style={{ background: "var(--bg-card)", color: "var(--text-muted)", border: "1px solid var(--border-subtle)" }}>
+            {games.length} games
+          </span>
         </div>
       </header>
 
@@ -113,19 +115,19 @@ export default function Home() {
       <div
         className="w-full"
         style={{
-          background: "linear-gradient(to bottom, rgba(217,119,87,0.06) 0%, transparent 100%)",
+          background: "linear-gradient(160deg, rgba(217,119,87,0.07) 0%, transparent 60%)",
           borderBottom: "1px solid var(--border-subtle)",
         }}
       >
-        <div className="max-w-6xl mx-auto px-6 py-12">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "var(--accent)" }}>
+        <div className="max-w-6xl mx-auto px-6 py-14">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "var(--accent)", letterSpacing: "0.12em" }}>
             Game Collection
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight mb-2" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+          <h1 className="text-4xl font-bold tracking-tight mb-3" style={{ color: "var(--text-primary)", letterSpacing: "-0.03em" }}>
             Pick something to play
           </h1>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            All games run in your browser — no download, no login.
+            All games run in your browser. No download, no login.
           </p>
         </div>
       </div>
@@ -139,10 +141,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer
-        className="text-center py-5 text-xs"
-        style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-subtle)" }}
-      >
+      <footer className="text-center py-6 text-xs" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-subtle)" }}>
         GameLab · Built with Next.js
       </footer>
     </main>

@@ -137,35 +137,81 @@ export default function SnakePage() {
 
   useEffect(() => () => { if (loopRef.current) clearInterval(loopRef.current); }, []);
 
+  if (status === "idle") {
+    return (
+      <div className="page">
+        <GameHeader title="Snake" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30` }}>
+                🐍
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Snake</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Eat food to grow. Don't hit the walls or yourself.
+            </p>
+
+            <div className="card p-4 mb-6">
+              <div className="text-xs space-y-2" style={{ color: "var(--text-secondary)" }}>
+                {[
+                  ["Arrow keys / WASD", "Move"],
+                  ["Swipe", "Move on mobile"],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded font-mono text-xs" style={{ background: "var(--bg-raised)", color: "var(--text-primary)" }}>{key}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-xs mb-2 text-center" style={{ color: "var(--text-muted)" }}>Speed</p>
+              <div className="flex gap-2">
+                {([200, 150, 100] as const).map((sp, i) => (
+                  <button key={sp} onClick={() => setSpeed(sp)} className="btn flex-1"
+                    style={speed === sp ? { background: COLOR, color: "#fff", border: "none" } : { background: "var(--bg-card)", color: "var(--text-primary)", border: "1px solid var(--border)" }}>
+                    {["Slow", "Normal", "Fast"][i]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button className="btn btn-primary btn-lg w-full" style={{ background: COLOR }} onClick={startGame}>
+              Start game
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <GameHeader title="Snake" color={COLOR} />
       <main className="page-content">
         <div className="game-container" style={{ maxWidth: 440 }}>
 
-          {/* Score row */}
+          {/* Score + speed row */}
           <div className="flex items-center justify-between mb-4">
-            <div className="card px-4 py-2.5 flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <div>
                 <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Score</div>
-                <div className="text-xl font-semibold" style={{ color: COLOR }}>{score}</div>
+                <div className="text-2xl font-bold" style={{ color: COLOR }}>{score}</div>
               </div>
               <div className="w-px h-8" style={{ background: "var(--border)" }} />
               <div>
                 <div className="text-xs mb-0.5" style={{ color: "var(--text-muted)" }}>Best</div>
-                <div className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{best}</div>
+                <div className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>{best}</div>
               </div>
             </div>
             <div className="flex items-center gap-1.5">
               {([200, 150, 100] as const).map((sp, i) => (
-                <button
-                  key={sp}
-                  onClick={() => setSpeed(sp)}
-                  className="btn btn-sm"
-                  style={speed === sp
-                    ? { background: COLOR, color: "#fff", border: "none" }
-                    : { background: "var(--bg-card)", color: "var(--text-muted)", border: "1px solid var(--border)" }}
-                >
+                <button key={sp} onClick={() => setSpeed(sp)} className="btn btn-sm"
+                  style={speed === sp ? { background: COLOR, color: "#fff", border: "none" } : { background: "var(--bg-card)", color: "var(--text-muted)", border: "1px solid var(--border)" }}>
                   {["Slow", "Normal", "Fast"][i]}
                 </button>
               ))}
@@ -173,44 +219,27 @@ export default function SnakePage() {
           </div>
 
           {/* Canvas */}
-          <div
-            className="rounded-2xl overflow-hidden relative mb-4"
-            style={{ border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}
-          >
+          <div className="rounded-2xl overflow-hidden relative mb-4" style={{ border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
             <canvas ref={canvasRef} width={SIZE} height={SIZE} className="block w-full" />
-            {status !== "running" && (
-              <div
-                className="absolute inset-0 flex flex-col items-center justify-center gap-5"
-                style={{ background: "rgba(16,16,16,0.92)" }}
-              >
-                {status === "dead" && (
-                  <div className="text-center">
-                    <div className="text-lg font-semibold mb-1" style={{ color: "var(--error)" }}>Game over</div>
-                    <div className="text-sm" style={{ color: "var(--text-muted)" }}>
-                      Score: <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{score}</span>
-                      {score === best && score > 0 && <span style={{ color: COLOR }}> · New best!</span>}
-                    </div>
+            {status === "dead" && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-5" style={{ background: "rgba(16,16,16,0.92)" }}>
+                <div className="text-center">
+                  <div className="text-xl font-bold mb-1" style={{ color: "var(--error)" }}>Game Over</div>
+                  <div className="text-sm mb-0.5" style={{ color: "var(--text-muted)" }}>
+                    Score: <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{score}</span>
                   </div>
-                )}
-                {status === "idle" && (
-                  <div className="text-center">
-                    <div className="text-4xl mb-3">🐍</div>
-                    <div className="text-base font-medium" style={{ color: "var(--text-secondary)" }}>Ready to play?</div>
-                  </div>
-                )}
-                <button
-                  className="btn btn-primary btn-lg"
-                  style={{ background: COLOR }}
-                  onClick={startGame}
-                >
-                  {status === "idle" ? "Start game" : "Play again"}
-                </button>
+                  {score === best && score > 0 && (
+                    <div className="text-xs font-semibold" style={{ color: COLOR }}>New best!</div>
+                  )}
+                </div>
+                <button className="btn btn-primary btn-lg" style={{ background: COLOR }} onClick={startGame}>Play again</button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setStatus("idle")}>Change speed</button>
               </div>
             )}
           </div>
 
           <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
-            Arrow keys or WASD to move · Swipe on mobile
+            Arrow keys or WASD · Swipe on mobile
           </p>
         </div>
       </main>

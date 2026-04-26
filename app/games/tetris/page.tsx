@@ -253,74 +253,112 @@ export default function TetrisPage() {
   useEffect(() => { draw(); }, [draw]);
   useEffect(() => () => { if (loopRef.current) clearInterval(loopRef.current); }, []);
 
+  const [started, setStarted] = useState(false);
+
+  if (!started) {
+    return (
+      <div className="page">
+        <GameHeader title="Tetris" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30` }}>
+                🟦
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Tetris</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Stack pieces, clear lines, survive as long as you can.
+            </p>
+            <div className="card p-4 mb-8">
+              <div className="text-xs space-y-2" style={{ color: "var(--text-secondary)" }}>
+                {[
+                  ["← → / A D", "Move left / right"],
+                  ["↑ / W", "Rotate piece"],
+                  ["↓ / S", "Soft drop"],
+                  ["Space", "Hard drop"],
+                  ["P", "Pause / resume"],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="px-2 py-0.5 rounded font-mono text-xs" style={{ background: "var(--bg-raised)", color: "var(--text-primary)" }}>{key}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button className="btn btn-primary btn-lg w-full" style={{ background: COLOR }}
+              onClick={() => { setStarted(true); startGame(); }}>
+              Start game
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <GameHeader title="Tetris" color={COLOR} />
       <main className="page-content">
-        <div className="flex gap-5 items-start justify-center flex-wrap">
+        <div className="flex flex-col items-center gap-4 w-full sm:flex-row sm:items-start sm:justify-center">
 
           {/* Canvas */}
           <div
-            className="rounded-2xl overflow-hidden relative"
-            style={{ border: "1px solid var(--border)", boxShadow: "var(--shadow-lg)", flexShrink: 0 }}
+            className="rounded-2xl overflow-hidden relative shrink-0"
+            style={{ border: "1px solid var(--border)", boxShadow: "var(--shadow-lg)" }}
           >
-            <canvas ref={canvasRef} width={COLS * CELL} height={ROWS * CELL} />
+            <canvas ref={canvasRef} width={COLS * CELL} height={ROWS * CELL} style={{ display: "block", maxWidth: "100%", height: "auto" }} />
             {status !== "running" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-5"
                 style={{ background: "rgba(16,16,16,0.92)" }}>
                 {status === "over" && (
                   <div className="text-center">
                     <div className="text-xl font-bold mb-1" style={{ color: "var(--error)" }}>Game Over</div>
-                    <div className="text-sm" style={{ color: "var(--text-muted)" }}>Score: <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{score}</span></div>
-                  </div>
-                )}
-                {status === "idle" && (
-                  <div className="text-center px-6">
-                    <div className="text-4xl mb-3">🎮</div>
-                    <div className="text-sm" style={{ color: "var(--text-secondary)" }}>Arrow keys / WASD to move<br />↑ or W to rotate · Space to drop</div>
+                    <div className="text-sm mb-0.5" style={{ color: "var(--text-muted)" }}>
+                      Score: <span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{score}</span>
+                    </div>
+                    <div className="text-xs" style={{ color: "var(--text-muted)" }}>Level {level} · {lines} lines</div>
                   </div>
                 )}
                 {status === "paused" && (
-                  <div className="text-lg font-bold" style={{ color: COLOR }}>Paused</div>
+                  <div className="text-xl font-bold" style={{ color: COLOR }}>Paused</div>
                 )}
-                <button className="btn btn-primary btn-lg" style={{ background: COLOR }} onClick={startGame}>
-                  {status === "idle" ? "Start game" : "Play again"}
+                <button className="btn btn-primary btn-lg" style={{ background: COLOR }}
+                  onClick={status === "over" ? startGame : () => { const s = stateRef.current; s.running = true; setStatus("running"); loopRef.current = setInterval(tick, Math.max(100, 800 - (s.level - 1) * 60)); }}>
+                  {status === "over" ? "Play again" : "Resume"}
                 </button>
+                {status === "over" && (
+                  <button className="btn btn-ghost btn-sm" onClick={() => setStarted(false)}>Back to menu</button>
+                )}
               </div>
             )}
           </div>
 
           {/* Side panel */}
-          <div className="flex flex-col gap-4" style={{ width: 130 }}>
-            <div className="card p-4">
-              <div className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Score</div>
-              <div className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{score}</div>
+          <div className="flex flex-row sm:flex-col gap-3 w-full sm:w-32">
+            {[
+              { label: "Score", value: score, color: "var(--text-primary)" },
+              { label: "Level", value: level, color: COLOR },
+              { label: "Lines", value: lines, color: "var(--text-primary)" },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="card p-3 flex-1 sm:flex-none text-center sm:text-left">
+                <div className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>{label}</div>
+                <div className="text-xl font-bold" style={{ color }}>{value}</div>
+              </div>
+            ))}
+
+            <div className="card p-3 flex-1 sm:flex-none">
+              <div className="text-xs mb-2 text-center sm:text-left" style={{ color: "var(--text-muted)" }}>Next</div>
+              <canvas ref={previewRef} width={96} height={72} className="block mx-auto" style={{ borderRadius: 6 }} />
             </div>
-            <div className="card p-4">
-              <div className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Level</div>
-              <div className="text-xl font-bold" style={{ color: COLOR }}>{level}</div>
-            </div>
-            <div className="card p-4">
-              <div className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>Lines</div>
-              <div className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>{lines}</div>
-            </div>
-            <div className="card p-4">
-              <div className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Next</div>
-              <canvas ref={previewRef} width={96} height={72} className="block" style={{ borderRadius: 8 }} />
-            </div>
+
             {status === "running" && (
-              <button className="btn btn-secondary btn-sm w-full" onClick={() => {
+              <button className="btn btn-secondary btn-sm w-full hidden sm:flex" onClick={() => {
                 const s = stateRef.current;
                 s.running = false; setStatus("paused");
                 if (loopRef.current) clearInterval(loopRef.current);
               }}>Pause</button>
-            )}
-            {status === "paused" && (
-              <button className="btn btn-primary btn-sm w-full" style={{ background: COLOR }} onClick={() => {
-                const s = stateRef.current;
-                s.running = true; setStatus("running");
-                loopRef.current = setInterval(tick, Math.max(100, 800 - (s.level - 1) * 60));
-              }}>Resume</button>
             )}
           </div>
         </div>

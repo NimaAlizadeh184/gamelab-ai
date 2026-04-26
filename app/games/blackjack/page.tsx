@@ -138,10 +138,57 @@ export default function BlackjackPage() {
     setResult(null); setMessage("");
   }, []);
 
+  const [started, setStarted] = useState(false);
   const chipAmounts = [25, 50, 100, 200, 500];
 
   const statusClass = result === "win" || result === "blackjack"
     ? "badge-success" : result === "loss" ? "badge-error" : "badge-accent";
+
+  if (!started) {
+    return (
+      <div className="page">
+        <GameHeader title="Blackjack" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center text-5xl font-black"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30`, color: COLOR }}
+              >
+                🂡
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Blackjack</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Beat the dealer to 21 without going bust. Starts with $1,000.
+            </p>
+            <div className="card p-4 mb-8">
+              <div className="text-xs space-y-2" style={{ color: "var(--text-secondary)" }}>
+                {[
+                  ["Hit", "Take another card"],
+                  ["Stand", "End your turn"],
+                  ["Double", "Double bet, one more card"],
+                  ["Blackjack", "Ace + 10 pays 3:2"],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between gap-3">
+                    <span className="px-2 py-0.5 rounded font-mono text-xs shrink-0" style={{ background: "var(--bg-raised)", color: "var(--text-primary)" }}>{key}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button
+              className="btn btn-primary btn-lg w-full"
+              style={{ background: COLOR, color: "#111" }}
+              onClick={() => setStarted(true)}
+            >
+              Start game
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="page">

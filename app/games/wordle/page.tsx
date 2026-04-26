@@ -124,6 +124,8 @@ export default function WordlePage() {
     return () => window.removeEventListener("keydown", onKey);
   }, [pressKey]);
 
+  const [started, setStarted] = useState(false);
+
   const newGame = () => {
     setAnswer(randomAnswer());
     setGuesses([]); setResults([]); setCurrent("");
@@ -147,25 +149,64 @@ export default function WordlePage() {
     rows.push(row);
   }
 
+  if (!started) {
+    return (
+      <div className="page">
+        <GameHeader title="Wordle" color={COLOR} />
+        <main className="page-content justify-center">
+          <div className="game-container" style={{ maxWidth: 340 }}>
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center gap-0.5 flex-wrap p-3"
+                style={{ background: `linear-gradient(145deg, ${COLOR}25, ${COLOR}08)`, border: `1px solid ${COLOR}30` }}>
+                {["🟩","🟨","⬛","🟩","⬛"].map((e, i) => <span key={i} className="text-lg leading-none">{e}</span>)}
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-center mb-2 tracking-tight" style={{ color: "var(--text-primary)" }}>Wordle</h2>
+            <p className="text-sm text-center mb-6" style={{ color: "var(--text-secondary)" }}>
+              Guess the 5-letter word in 6 tries.
+            </p>
+            <div className="card p-4 mb-8">
+              <div className="text-xs space-y-3" style={{ color: "var(--text-secondary)" }}>
+                <div className="flex items-center gap-3">
+                  <span className="text-base">🟩</span>
+                  <span>Letter is in the word and in the right spot</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-base">🟨</span>
+                  <span>Letter is in the word but in the wrong spot</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-base">⬛</span>
+                  <span>Letter is not in the word</span>
+                </div>
+              </div>
+            </div>
+            <button className="btn btn-primary btn-lg w-full" style={{ background: COLOR, color: "#111" }}
+              onClick={() => { newGame(); setStarted(true); }}>
+              Start game
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <GameHeader title="Wordle" color={COLOR} />
       <main className="page-content items-center">
         <div className="game-container flex flex-col items-center" style={{ maxWidth: 380 }}>
 
-          {/* Message toast */}
-          <div
-            className="text-sm font-semibold px-4 py-2 rounded-xl mb-4 transition-all duration-200"
-            style={{
-              background: message ? "var(--bg-raised)" : "transparent",
-              color: "var(--text-primary)",
-              border: message ? "1px solid var(--border)" : "1px solid transparent",
-              opacity: message ? 1 : 0,
-              minHeight: 36,
-            }}
-          >
-            {message}
-          </div>
+          {/* Message toast - only rendered when there is a message */}
+          {message && (
+            <div
+              className="text-sm font-semibold px-4 py-2 rounded-xl mb-4"
+              style={{ background: "var(--bg-raised)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+            >
+              {message}
+            </div>
+          )}
+          {!message && <div className="mb-4" style={{ height: 36 }} />}
 
           {/* Board */}
           <div className="flex flex-col gap-1.5 mb-6">
